@@ -6,7 +6,10 @@ Contains universal constants for catalysis research
 """
 
 import numpy as np
+from warnings import warn
 
+_vunits_warn_msg = ('pMuTT.constants.{0} deprecated since 1.2.17. Please use '
+                    'vunits.{1}.{0} instead.')
 
 def R(units):
     """Universal molar gas constant, R
@@ -46,6 +49,7 @@ def R(units):
         KeyError
             If units is not supported.
     """
+    warn(_vunits_warn_msg.format('R', 'constants'))
     R_dict = {
         'J/mol/K': 8.3144598,
         'kJ/mol/K': 8.3144598e-3,
@@ -100,6 +104,7 @@ def h(units, bar=False):
         KeyError
             If units is not supported.
     """
+    warn(_vunits_warn_msg.format('h', 'constants'))
     h_dict = {
         'J s': 6.626070040e-34,
         'kJ s': 6.626070040e-37,
@@ -150,6 +155,7 @@ def kb(units):
         KeyError
             If units is not supported.
     """
+    warn(_vunits_warn_msg.format('kb', 'constants'))
     kb_dict = {
         'J/K': 1.38064852e-23,
         'kJ/K': 1.38064852e-26,
@@ -191,6 +197,7 @@ def c(units):
         KeyError
             If units is not supported.
     """
+    warn(_vunits_warn_msg.format('c', 'constants'))
     c_dict = {
         'm/s': 299792458.,
         'cm/s': 299792458.e2,
@@ -228,6 +235,7 @@ def m_e(units):
         KeyError
             If units is not supported.
     """
+    warn(_vunits_warn_msg.format('m_e', 'constants'))
     try:
         return convert_unit(num=5.48579909070e-4, initial='amu', final=units)
     except KeyError:
@@ -260,6 +268,7 @@ def m_p(units):
         KeyError
             If units is not supported.
     """
+    warn(_vunits_warn_msg.format('m_p', 'constants'))
     try:
         return convert_unit(num=1.007276466879, initial='amu', final=units)
     except KeyError:
@@ -297,6 +306,7 @@ def P0(units):
         KeyError
             If units is not supported.
     """
+    warn(_vunits_warn_msg.format('P0', 'constants'))
     try:
         return convert_unit(num=1., initial='bar', final=units)
     except KeyError:
@@ -331,6 +341,7 @@ def T0(units):
         KeyError
             If units is not supported.
     """
+    warn(_vunits_warn_msg.format('T0', 'constants'))
     try:
         return convert_unit(num=298.15, initial='K', final=units)
     except KeyError:
@@ -356,6 +367,7 @@ def V0(units):
             L     Liters            24.465395404589188
             ====  ================  ===================
     """
+    warn(_vunits_warn_msg.format('V0', 'constants'))
     V0 = R('J/mol/K')*T0('K')/P0('Pa')
     return V0*convert_unit(initial='m3', final=units)
 
@@ -589,6 +601,7 @@ def convert_unit(num=None, initial=None, final=None):
     ========= =======================
 
     """
+    warn(_vunits_warn_msg.format('convert_unit', 'convert'))
     unit_dict = {
         'J': 1.,
         'kJ': 1.e-3,
@@ -727,6 +740,7 @@ def energy_to_freq(energy):
         freq : float
             Frequency in Hz
     """
+    warn(_vunits_warn_msg.format('energy_to_freq', 'convert'))
     return energy/h('J s')
 
 
@@ -742,6 +756,7 @@ def energy_to_temp(energy):
         temp : float
             Temperature in K
     """
+    warn(_vunits_warn_msg.format('energy_to_temp', 'convert'))
     return energy/kb('J/K')
 
 
@@ -757,6 +772,7 @@ def energy_to_wavenumber(energy):
         wavenumber : float
             Wavenumber in 1/cm
     """
+    warn(_vunits_warn_msg.format('energy_to_wavenumber', 'convert'))
     return energy/h('J s')/c('cm/s')
 
 
@@ -772,6 +788,7 @@ def freq_to_energy(freq):
         energy : float
             Energy in J
     """
+    warn(_vunits_warn_msg.format('freq_to_energy', 'convert'))
     return freq*h('J s')
 
 
@@ -787,6 +804,7 @@ def freq_to_temp(freq):
         temp : float
             Temperature in K
     """
+    warn(_vunits_warn_msg.format('freq_to_temp', 'convert'))
     return freq*h('J s')/kb('J/K')
 
 
@@ -802,6 +820,7 @@ def freq_to_wavenumber(freq):
         wavenumber : float
             Wavenumber in 1/cm
     """
+    warn(_vunits_warn_msg.format('freq_to_wavenumber', 'convert'))
     return freq/c('cm/s')
 
 
@@ -817,6 +836,7 @@ def inertia_to_temp(inertia):
         rot_temperature : float
             Rotational temperature in K
     """
+    warn(_vunits_warn_msg.format('inertia_to_temp', 'convert'))
     return h('eV s', bar=True)**2/2./kb('eV/K')/inertia \
         * convert_unit(initial='eV', final='J')
 
@@ -833,6 +853,7 @@ def temp_to_energy(temp):
         energy : float
             Energy in J
     """
+    warn(_vunits_warn_msg.format('temp_to_energy', 'convert'))
     return temp*kb('J/K')
 
 
@@ -848,6 +869,7 @@ def temp_to_freq(temp):
         freq : float
             Frequency in Hz
     """
+    warn(_vunits_warn_msg.format('temp_to_freq', 'convert'))
     return temp*kb('J/K')/h('J s')
 
 
@@ -863,6 +885,7 @@ def temp_to_wavenumber(temp):
         wavenumber : float
             Wavenumber in 1/cm
     """
+    warn(_vunits_warn_msg.format('temp_to_wavenumber', 'convert'))
     return temp*kb('J/K')/c('cm/s')/h('J s')
 
 
@@ -878,6 +901,7 @@ def wavenumber_to_energy(wavenumber):
         energies : float
             Corresponding temperature in J
     """
+    warn(_vunits_warn_msg.format('wavenumber_to_energy', 'convert'))
     return wavenumber*c('cm/s')*h('J s')
 
 
@@ -893,6 +917,7 @@ def wavenumber_to_freq(wavenumber):
         freq : float
             Frequency in Hz
     """
+    warn(_vunits_warn_msg.format('wavenumber_to_freq', 'convert'))
     return wavenumber*c('cm/s')
 
 
@@ -908,6 +933,7 @@ def wavenumber_to_inertia(wavenumber):
         mu : float
             Moment of inertia in kg*m2
     """
+    warn(_vunits_warn_msg.format('wavenumber_to_inertia', 'convert'))
     return h('J s')/(8.*np.pi**2*wavenumber*c('cm/s'))
 
 
@@ -923,6 +949,7 @@ def wavenumber_to_temp(wavenumber):
         temperature : float
             Corresponding temperature in K
     """
+    warn(_vunits_warn_msg.format('wavenumber_to_temp', 'convert'))
     return wavenumber*c('cm/s')*h('J s')/kb('J/K')
 
 
@@ -938,6 +965,7 @@ def debye_to_einstein(debye_temperature):
         einstein_temperature : float
             Einstein temperature in K
     """
+    warn(_vunits_warn_msg.format('debye_to_einstein', 'convert'))
     return (np.pi/6.)**(1./3.)*debye_temperature
 
 
@@ -953,6 +981,7 @@ def einstein_to_debye(einstein_temperature):
         debye_temperature : float
             Debye temperature in K
     """
+    warn(_vunits_warn_msg.format('einstein_to_debye', 'convert'))
     return einstein_temperature/(np.pi/6.)**(1./3.)
 
 symmetry_dict = {

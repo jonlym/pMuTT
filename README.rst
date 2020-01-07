@@ -42,6 +42,7 @@ Dependencies
 -  `NetworkX`_: Used to plot reaction networks
 -  `More Itertools`_: Used for writing ranges for OpenMKM output.
 -  `PyYAML`_: Used to write YAML input files for OpenMKM.
+-  `VUnits`_: Used for unit conversions and constants.
 
 Getting Started
 ---------------
@@ -130,6 +131,7 @@ Special Thanks
 .. _networkx: https://networkx.github.io/
 .. _`More Itertools`: https://more-itertools.readthedocs.io/en/stable/index.html
 .. _`PyYAML`: https://pyyaml.org/
+.. _`VUnits`: https://vlachosgroup.github.io/vunits/includeme.html
 .. _tests directory: https://github.com/VlachosGroup/pMuTT/tree/master/pmutt/tests
 .. _LICENSE.md: https://github.com/VlachosGroup/pMuTT/blob/master/LICENSE.md
 .. _`see documentation for more thorough instructions`: https://vlachosgroup.github.io/pMuTT/install.html

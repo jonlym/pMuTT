@@ -36,7 +36,8 @@ setuptools_info = {
 		'pygal>=2.4.0',
 		'xlrd>=1.2.0',
 		'more_itertools>=7.2.0',
-	    'PyYAML>=5.1.2'],
+	    'PyYAML>=5.1.2',
+		'vunits>=0.0.1'],
 	'classifiers': [
 		"Programming Language :: Python :: 3",
 		"License :: OSI Approved :: MIT License",

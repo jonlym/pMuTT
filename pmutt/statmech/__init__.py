@@ -9,6 +9,9 @@ from copy import copy
 
 import numpy as np
 
+from vunits import constants as c
+from vunits.quantity import Quantity, _force_get_quantity, _return_quantity
+
 from pmutt import (_apply_numpy_operation, _get_mode_quantity, _get_R_adj,
                    _get_specie_kwargs, _is_iterable, _ModelBase,
                    _pass_expected_arguments, _check_obj, _check_iterable_attr)
@@ -25,29 +28,53 @@ class EmptyMode(_ModelBase):
     def __init__(self):
         pass
 
-    def get_q(self):
-        return 1.
+    def get_q(self, return_quantity=False):
+        q_out = Quantity(mag=1)
+        return _return_quantity(quantity=q_out,
+                                return_quantity=return_quantity,
+                                units_out=None)
 
-    def get_CvoR(self):
-        return 0.
+    def get_CvoR(self, return_quantity=False):
+        CvoR_out = Quantity(mag=0.)
+        return _return_quantity(quantity=CvoR_out,
+                                return_quantity=return_quantity,
+                                units_out=None)
 
-    def get_CpoR(self):
-        return 0.
+    def get_CpoR(self, return_quantity=False):
+        CpoR_out = Quantity(mag=0.)
+        return _return_quantity(quantity=CpoR_out,
+                                return_quantity=return_quantity,
+                                units_out=None)
 
-    def get_UoRT(self):
-        return 0.
+    def get_UoRT(self, return_quantity=False):
+        UoRT_out = Quantity(mag=0.)
+        return _return_quantity(quantity=UoRT_out,
+                                return_quantity=return_quantity,
+                                units_out=None)
 
-    def get_HoRT(self):
-        return 0.
+    def get_HoRT(self, return_quantity=False):
+        HoRT_out = Quantity(mag=0.)
+        return _return_quantity(quantity=HoRT_out,
+                                return_quantity=return_quantity,
+                                units_out=None)
 
-    def get_SoR(self):
-        return 0.
+    def get_SoR(self, return_quantity=False):
+        SoR_out = Quantity(mag=0.)
+        return _return_quantity(quantity=SoR_out,
+                                return_quantity=return_quantity,
+                                units_out=None)
 
-    def get_FoRT(self):
-        return 0.
+    def get_FoRT(self, return_quantity=False):
+        FoRT_out = Quantity(mag=0.)
+        return _return_quantity(quantity=FoRT_out,
+                                return_quantity=return_quantity,
+                                units_out=None)
 
-    def get_GoRT(self):
-        return 0.
+    def get_GoRT(self, return_quantity=False):
+        GoRT_out = Quantity(mag=0.)
+        return _return_quantity(quantity=GoRT_out,
+                                return_quantity=return_quantity,
+                                units_out=None)
 
 class ConstantMode(_ModelBase):
     """Mode where thermodynamic properties can be arbitrarily set. Note that
@@ -56,21 +83,21 @@ class ConstantMode(_ModelBase):
  
     Attributes
     ----------
-        q : float, optional
+        q : float or `Quantity`_ object, optional
             Partition function. Default is 1
-        Cv : float, optional
+        Cv : float or `Quantity`_ object, optional
             Heat capacity at constant volume in eV/K. Default is 0
-        Cp : float, optional
+        Cp : float or `Quantity`_ object, optional
             Heat capacity at constant pressure in eV/K. Default is 0
-        U : float, optional
+        U : float or `Quantity`_ object, optional
             Internal energy in eV. Default is 0
-        H : float, optional
+        H : float or `Quantity`_ object, optional
             Enthalpy in eV. Default is 0
-        S : float, optional
+        S : float or `Quantity`_ object, optional
             Entropy in eV/K. Default is 0
-        F : float, optional
+        F : float or `Quantity`_ object, optional
             Helmholtz energy in eV. Default is 0
-        G : float, optional
+        G : float or `Quantity`_ object, optional
             Gibbs energy in eV. Default is 0
         notes : str or dict, optional
             Any additional details you would like to include such as
@@ -79,14 +106,14 @@ class ConstantMode(_ModelBase):
     """
     def __init__(self, q=1., Cv=0., Cp=0., U=0., H=0., S=0., F=0., G=0.,
                  notes=None):
-        self.q = q
-        self.Cv = Cv
-        self.Cp = Cp
-        self.U = U
-        self.H = H
-        self.S = S
-        self.F = F
-        self.G = G
+        self.q = _force_get_quantity(q)
+        self.Cv = _force_get_quantity(Cv, 'eV/K/molecule')
+        self.Cp = _force_get_quantity(Cp, 'eV/K/molecule')
+        self.U = _force_get_quantity(U, 'eV/molecule')
+        self.H = _force_get_quantity(H, 'eV/molecule')
+        self.S = _force_get_quantity(S, 'eV/K/molecule')
+        self.F = _force_get_quantity(F, 'eV/molecule')
+        self.G = _force_get_quantity(G, 'eV/molecule')
         self.notes = notes
 
     def get_q(self):
