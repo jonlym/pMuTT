@@ -21,6 +21,8 @@ from warnings import warn
 import numpy as np
 import pygal
 from matplotlib import pyplot as plt
+from vunits.db import atomic_weight
+from vunits.quantity import _return_quantity, Quantity
 
 from pmutt import constants as c
 from pmutt.io.json import remove_class
@@ -647,7 +649,8 @@ def _get_specie_kwargs(specie_name, **kwargs):
         pass
     return specie_kwargs
 
-def _apply_numpy_operation(quantity, operation, verbose=False):
+def _apply_numpy_operation(quantity, operation, verbose=False,
+                           return_quantity=False):
     """Apply operation to quantity
 
     Parameters
@@ -659,16 +662,42 @@ def _apply_numpy_operation(quantity, operation, verbose=False):
         verbose : bool, optional
             If True, returns quantity with no further operations. Default is
             False
+        return_quantity : bool, optional
+            If True, returns `Quantity`_ obj. Otherwise, returns float``.
+            Default is False                
     Returns
     -------
         quantity : float or (N,) np.ndarray
             Quantity of interest in the desired format
     """
     if verbose:
-        out_quantity = quantity
+        out_quantity = _return_quantity(quantity=quantity,
+                                        return_quantity=return_quantity)
     else:
-        np_method = getattr(np, operation)
-        out_quantity = np_method(quantity)
+        # Process Quantity objects without Numpy.
+        if any(type(x) == Quantity for x in quantity):
+            if operation.lower() == 'sum': 
+                out_quantity = None
+                for single_quantity in quantity:
+                    if out_quantity is None:
+                        out_quantity = single_quantity
+                    else:
+                        out_quantity += single_quantity
+            elif operation.lower() == 'prod':
+                out_quantity = Quantity(mag=1.)
+                for single_quantity in quantity:
+                    out_quantity *= single_quantity
+            else:
+                err_msg = ('Encounted unsupported operation, {}, for Quantity
+                           'objects. Please input "sum" or "prod".'
+                           ''.format(operation))
+                raise ValueError(err_msg)
+            out_quantity = _return_quantity(quantity=out_quantity,
+                                            return_quantity=return_quantity)
+        # If no Quantity objects present, process using Numpy
+        else:
+            np_method = getattr(np, operation)
+            out_quantity = np_method(quantity)
     return out_quantity
 
 def parse_formula(formula):
@@ -691,7 +720,7 @@ def parse_formula(formula):
         elements[element] = elements.get(element, 0) + int(coefficient or '1')
     return elements
 
-def get_molecular_weight(elements):
+def get_molecular_weight(elements, return_quantity=False):
     """Molecular mass (in g/mol) given the elemental composition.
     Data taken from: https://en.wikipedia.org/wiki/Standard_atomic_weight
 
@@ -705,20 +734,24 @@ def get_molecular_weight(elements):
             coefficient.
             If a string is passed, the formula will be guessed using
             pmutt.parse_formula
-
+        return_quantity : bool, optional
+            If True, returns `Quantity`_ obj. Otherwise, returns float``.
+            Default is False        
     Returns
     -------
         molecular_weight : float
-            Molecular weight as float in kg/mol
+            Molecular weight as float in g/mol
     """
     if isinstance(elements, str):
         elements = parse_formula(elements)
 
-    molecular_weight = 0.
+    molecular_weight = Quantity(mag=0., kg=1, mol=-1)
     for element, coefficient in elements.items():
-        molecular_weight += c.atomic_weight[element] * coefficient
+        molecular_weight += Quantity(mag=atomic_weight[element]*coefficient,
+                                     kg=1, mol=-1)
 
-    return molecular_weight
+    return _return_quantity(quantity=molecular_weight, units_out='g/mol'
+                            return_quantity=return_quantity)
 
 def pmutt_list_to_dict(pmutt_list, key='name'):
     """Converts a pmutt list to a dictionary using a specified attribute. This
@@ -765,30 +798,7 @@ def format_conditions(**kwargs):
                 conditions.append({cond_name: cond_value})
     return conditions
 
-def _get_mass_unit(units):
-    """Determine the mass units present
-    
-    Parameters
-    ----------
-        units : str
-            Units as string. Units are delimited by '/'
-    Returns
-    -------
-        mass_units : str
-            Mass units    
-    """
-    units_sep = units.split('/')
-    for unit in units_sep:
-        try:
-            unit_type = c.type_dict[unit]
-        except KeyError:
-            pass
-        else:
-            if unit_type == 'mass':
-                return unit
-    return None
-
-def _get_R_adj(units, elements=None):
+def _get_R_adj(units, elements=None, return_quantity=False):
     """Get adjustment to mass when converting from mol to g
     
     Parameters
@@ -807,11 +817,13 @@ def _get_R_adj(units, elements=None):
             Adjustment to the mass. If no mass units are found, returns R in
             appropriate units.
     """
-    mass_unit = _get_mass_unit(units)
+    desired_R = Quantity.from_units(units=units)
     
-    # If no mass unit is found, return R in appropriate units
-    if mass_unit is None:
+    # If the only mass unit is part of the energy term, return R in appropriate
+    # units
+    if desired_R.kg == 1:
         return c.R(units)
+        
     # If elements were not provided, throw error
     if elements is None:
         err_msg = ('To calculate thermodynamic quantities on per mass basis, '
@@ -819,11 +831,11 @@ def _get_R_adj(units, elements=None):
                    'elements.')
         raise AttributeError(err_msg)
 
-    mol_weight = get_molecular_weight(elements) # g/mol
-    mol_units = units.replace('/{}'.format(mass_unit), '/mol')
-    R_adj = c.R(mol_units)/c.convert_unit(num=mol_weight, initial='g',
-                                          final=mass_unit)
-    return R_adj
+    mol_weight = get_molecular_weight(elements=elements,
+                                      return_quantity=True)
+    R_adj = c.R/mol_weight
+    return _return_quantity(quantity=R_adj, return_quantity=return_quantity,
+                            units_out=units)
 
 def _check_obj(obj, **kwargs):
     """Helper function to create an object if the class definition is passed.
